@@ -1,8 +1,14 @@
 # LabPBR2Bedrock
 
+[![English](https://img.shields.io/badge/lang-English-blue)](README.md)
+
 **LabPBR to Bedrock Converter**
 
 LabPBR2Bedrock es una aplicación de escritorio para convertir texturas PBR de Minecraft Java en formato LabPBR al formato PBR compatible con Minecraft Bedrock.
+
+## Captura de pantalla
+
+![LabPBR2Bedrock](https://ik.imagekit.io/dmNtb25nZQ/LabPBR2Bedrock/LabPBR2Bedrock.webp?updatedAt=1787277920137)
 
 Convierte:
 

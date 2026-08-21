@@ -6,6 +6,10 @@
 
 LabPBR2Bedrock is a desktop application for converting Minecraft Java PBR textures in LabPBR format into the PBR format supported by Minecraft Bedrock.
 
+## Screenshot
+
+![LabPBR2Bedrock](https://ik.imagekit.io/dmNtb25nZQ/LabPBR2Bedrock/LabPBR2Bedrock.webp?updatedAt=1787277920137)
+
 It converts:
 
 - Specular maps named `*_s.png` into MER maps named `*_mer.png`.
