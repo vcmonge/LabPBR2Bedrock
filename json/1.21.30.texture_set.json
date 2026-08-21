@@ -1,0 +1,8 @@
+{
+  "format_version": "1.21.30",
+  "minecraft:texture_set": {
+    "color": "{$nombre}",
+    "metalness_emissive_roughness_subsurface": "{$nombre}_mers",
+    "normal": "{$nombre}_normal"
+  }
+}
