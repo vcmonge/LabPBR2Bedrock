@@ -138,3 +138,13 @@ The folder selected using `Change...` is remembered between runs. The saved pref
 ## Notes
 
 - The original input files are not modified or deleted.
+
+## Acknowledgements
+
+The LabPBR-to-Bedrock PBR conversion logic in `mer_converter.py` and `normal_converter.py` was was adapted from portions of [JE2BE Resource Pack Converter](https://github.com/Seraphic-Studio/JE2BE-Resource-Pack-Converter) by the JE2BE Team.
+
+The implementation in this project has since been substantially modified and
+extended.
+
+JE2BE Resource Pack Converter is licensed under the MIT License.
+See `THIRD_PARTY_LICENSES.md` for the original copyright notice and license.

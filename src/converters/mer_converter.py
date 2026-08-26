@@ -1,3 +1,9 @@
+# Portions of the conversion logic in this module were adapted from
+# JE2BE Resource Pack Converter.
+# Copyright (c) 2025 JE2BE Team
+# Licensed under the MIT License.
+# See THIRD_PARTY_LICENSES.md.
+
 """Convert LabPBR specular maps into Bedrock MER or MERS textures.
 
 LabPBR packs smoothness, F0/metal ID, subsurface scattering, and emission into

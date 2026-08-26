@@ -137,3 +137,12 @@ La carpeta elegida con `Change...` se recuerda entre ejecuciones. La preferencia
 ## Notas
 
 - Los archivos originales de entrada no se modifican ni se eliminan.
+
+## Agradecimientos
+
+La lógica de conversión de LabPBR a PBR de Bedrock en `mer_converter.py` y `normal_converter.py` se adaptó a partir de partes de [JE2BE Resource Pack Converter](https://github.com/Seraphic-Studio/JE2BE-Resource-Pack-Converter), desarrollado por el equipo de JE2BE.
+
+Desde entonces, la implementación de este proyecto se ha modificado y ampliado considerablemente.
+
+JE2BE Resource Pack Converter está publicado bajo la licencia MIT.
+Consulta `THIRD_PARTY_LICENSES.md` para ver el aviso de copyright y la licencia originales.
