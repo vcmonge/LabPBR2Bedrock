@@ -1,165 +1,241 @@
 from pathlib import Path
 
 
-ARROW_ICON_PATH = (
-    Path(__file__).resolve().parents[1] / "assets" / "chevron_down_icon.svg"
-).as_posix()
+ASSETS_DIR = Path(__file__).resolve().parents[1] / "assets"
+ARROW_ICON_PATH = (ASSETS_DIR / "chevron_down_icon.svg").as_posix()
+CHECK_ICON_PATH = (ASSETS_DIR / "check_icon.svg").as_posix()
 
 
 MAIN_WINDOW_STYLES = """
 #windowRoot,
 #rightPanel {
-    background: #f8f9fb;
+    background: #f8f9fa;
 }
 QWidget {
-    color: #171b24;
-    font-size: 10.5pt;
+    color: #1f1f1f;
+    font-size: 10pt;
 }
 
 #dropArea {
-    border: 2px dashed #c8ccd2;
-    border-radius: 8px;
+    border: 2px dashed #c4c6d0;
+    border-radius: 16px;
     background: #ffffff;
 }
+#dropArea:hover {
+    border-color: #74777f;
+}
 #dropArea[dragging="true"] {
-    border-color: #4f8fdf;
-    background: #f2f7ff;
+    border-color: #0b57d0;
+    background: #f0f4fd;
 }
 #dropTitle {
-    color: #151a24;
+    color: #1f1f1f;
     font-size: 15pt;
-    font-weight: 700;
+    font-weight: 600;
 }
 #dropOr {
-    color: #343943;
-    font-size: 11pt;
+    color: #44474e;
+    font-size: 10.5pt;
 }
 #dropSubtitle {
-    color: #727782;
+    color: #44474e;
     font-size: 9.5pt;
-    line-height: 1.3;
+    line-height: 1.4;
 }
 #dropFileList {
-    color: #303640;
+    color: #1f1f1f;
     font-size: 10pt;
-    border: 1px solid #e0e3e8;
-    border-radius: 5px;
-    background: #fbfcfd;
+    border: 1px solid #c4c6d0;
+    border-radius: 8px;
+    background: #f1f3f5;
     outline: 0;
+    padding: 4px;
 }
 #dropFileList::item {
-    min-height: 25px;
-    padding: 2px 5px;
+    min-height: 26px;
+    padding: 2px 8px;
+    border-radius: 4px;
     background: transparent;
+}
+#dropFileList::item:hover {
+    background: rgba(31, 31, 31, 0.08);
 }
 
 #optionsPanel,
 #activityPanel,
 #outputPanel {
-    border: 1px solid #d9dce1;
-    border-radius: 7px;
+    border: 1px solid #c4c6d0;
+    border-radius: 12px;
     background: #ffffff;
 }
 #sectionDivider {
-    color: #e1e3e7;
-    background: #e1e3e7;
+    color: #c4c6d0;
+    background: #c4c6d0;
     border: 0;
     max-height: 1px;
 }
 #sectionTitle {
-    color: #181c24;
+    color: #1f1f1f;
     font-size: 11.5pt;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 QPushButton {
     min-height: 38px;
-    padding: 5px 14px;
-    border: 1px solid #cbd0d7;
-    border-radius: 6px;
-    color: #242933;
+    padding: 0 16px;
+    border: 1px solid #74777f;
+    border-radius: 19px;
+    color: #0b57d0;
+    background: #ffffff;
+    font-size: 10pt;
+    font-weight: 500;
+    outline: 0;
+}
+QPushButton:hover {
+    border-color: #0b57d0;
+    background: #f0f4fd;
+}
+QPushButton:pressed {
+    background: #d3e3fd;
+}
+QPushButton:focus {
+    border-color: #0b57d0;
+}
+QPushButton:disabled {
+    border-color: rgba(31, 31, 31, 0.12);
+    color: rgba(31, 31, 31, 0.38);
+    background: transparent;
+}
+
+#primaryButton,
+#clearButton {
+    min-height: 40px;
+    font-size: 11pt;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 0 20px;
+}
+#primaryButton {
+    color: #ffffff;
+    border: 0;
+    background: #0b57d0;
+}
+#primaryButton:hover {
+    background: #0842a0;
+}
+#primaryButton:pressed {
+    background: #063380;
+}
+#primaryButton:disabled {
+    color: rgba(31, 31, 31, 0.38);
+    border: 0;
+    background: rgba(31, 31, 31, 0.12);
+}
+
+#clearButton {
+    color: #ba1a1a;
+    border: 1px solid #ba1a1a;
+    background: #ffffff;
+}
+#clearButton:hover {
+    border-color: #ba1a1a;
+    background: #ffdad6;
+}
+#clearButton:pressed {
+    background: #ffb4ab;
+}
+#clearButton:focus {
+    border-color: #ba1a1a;
+}
+
+#browseButton {
+    min-width: 180px;
+    min-height: 40px;
+    border-radius: 20px;
+    border: 1px solid #74777f;
+    color: #0b57d0;
     background: #ffffff;
     font-size: 10.5pt;
     font-weight: 500;
 }
-QPushButton:hover {
-    border-color: #9da5b0;
-    background: #f7f8fa;
+#browseButton:hover {
+    border-color: #0b57d0;
+    background: #f0f4fd;
 }
-QPushButton:pressed {
-    background: #eef0f3;
+#browseButton:pressed {
+    background: #d3e3fd;
 }
-#primaryButton,
-#clearButton {
-    min-height: 44px;
-    font-size: 12pt;
-    font-weight: 600;
-}
-#primaryButton {
-    color: #2f78d4;
-    border-color: #7caeea;
-    background: #f5f9ff;
-}
-#primaryButton:hover {
-    border-color: #4f8fdf;
-    background: #eaf3ff;
-}
-#primaryButton:pressed {
-    background: #dfeeff;
-}
-#primaryButton:disabled {
-    color: #8aaed8;
-    border-color: #b9d0eb;
-    background: #f5f8fc;
-}
-#clearButton {
-    color: #ee444b;
-    border-color: #f08a8f;
-    background: #fff8f8;
-}
-#clearButton:hover {
-    border-color: #ed5f66;
-    background: #fff0f1;
-}
-#clearButton:pressed {
-    background: #ffe4e6;
-}
-#browseButton,
+
 #secondaryButton {
-    color: #252a33;
+    min-height: 38px;
+    border-radius: 19px;
+    border: 1px solid #74777f;
+    color: #0b57d0;
     background: #ffffff;
+    padding: 0 16px;
 }
-#browseButton {
-    min-width: 180px;
+#secondaryButton:hover {
+    border-color: #0b57d0;
+    background: #f0f4fd;
+}
+#secondaryButton:pressed {
+    background: #d3e3fd;
 }
 
 QCheckBox {
-    min-height: 27px;
-    spacing: 8px;
+    min-height: 28px;
+    spacing: 10px;
     font-size: 10.5pt;
+    color: #1f1f1f;
+}
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #74777f;
+    border-radius: 3px;
+    background: transparent;
+}
+QCheckBox::indicator:hover {
+    border-color: #1f1f1f;
+    background: rgba(31, 31, 31, 0.04);
+}
+QCheckBox::indicator:checked {
+    border: 2px solid #0b57d0;
+    background-color: #0b57d0;
+    image: url("__CHECK_ICON_PATH__");
+}
+QCheckBox::indicator:checked:hover {
+    border-color: #0842a0;
+    background-color: #0842a0;
+}
+QCheckBox::indicator:disabled {
+    border-color: rgba(31, 31, 31, 0.12);
+    background: transparent;
 }
 QCheckBox:disabled {
-    color: #9a9fa8;
+    color: rgba(31, 31, 31, 0.38);
 }
+
 #versionCombo {
-    min-height: 34px;
-    padding: 2px 36px 2px 10px;
-    border: 1px solid #cbd0d7;
-    border-radius: 5px;
-    color: #252a33;
+    min-height: 38px;
+    padding: 2px 36px 2px 12px;
+    border: 1px solid #74777f;
+    border-radius: 8px;
+    color: #1f1f1f;
     background: #ffffff;
-    font-size: 10.5pt;
+    font-size: 10pt;
 }
 #versionCombo:hover {
-    border-color: #9da5b0;
+    border-color: #1f1f1f;
+}
+#versionCombo:focus {
+    border: 2px solid #0b57d0;
 }
 #versionCombo::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
     width: 34px;
     border: 0;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
     background: transparent;
 }
 #versionCombo::down-arrow {
@@ -168,33 +244,39 @@ QCheckBox:disabled {
     image: url("__ARROW_ICON_PATH__");
 }
 #versionCombo QAbstractItemView {
-    padding: 3px;
-    border: 1px solid #cbd0d7;
-    border-radius: 4px;
-    color: #252a33;
+    padding: 4px;
+    border: 1px solid #c4c6d0;
+    border-radius: 8px;
+    color: #1f1f1f;
     background: #ffffff;
-    selection-color: #ffffff;
-    selection-background-color: #4f8fdf;
+    selection-color: #041e49;
+    selection-background-color: #d3e3fd;
     outline: 0;
 }
 
 #consoleInfo {
-    padding: 8px;
-    border: 1px solid #d5d9df;
-    border-radius: 6px;
-    color: #2f3540;
-    background: #ffffff;
-    selection-color: #ffffff;
-    selection-background-color: #4f8fdf;
+    padding: 10px;
+    border: 1px solid #c4c6d0;
+    border-radius: 8px;
+    color: #1f1f1f;
+    background: #f1f3f5;
+    selection-color: #041e49;
+    selection-background-color: #d3e3fd;
+    font-family: Consolas, "Cascadia Code", monospace, "Segoe UI";
     font-size: 9pt;
 }
+
 #outputPath {
     min-height: 38px;
-    padding: 0 10px;
-    border: 1px solid #cbd0d7;
-    border-radius: 5px;
-    color: #252a33;
-    background: #ffffff;
+    padding: 0 12px;
+    border: 1px solid #c4c6d0;
+    border-radius: 8px;
+    color: #1f1f1f;
+    background: #f1f3f5;
     font-size: 10pt;
 }
-""".replace("__ARROW_ICON_PATH__", ARROW_ICON_PATH)
+""".replace(
+    "__ARROW_ICON_PATH__", ARROW_ICON_PATH
+).replace(
+    "__CHECK_ICON_PATH__", CHECK_ICON_PATH
+)

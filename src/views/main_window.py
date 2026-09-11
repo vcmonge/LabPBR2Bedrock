@@ -70,8 +70,8 @@ class MainWindow(QMainWindow):
         root.setObjectName("windowRoot")
         self.setCentralWidget(root)
         layout = QHBoxLayout(root)
-        layout.setContentsMargins(18, 18, 18, 18)
-        layout.setSpacing(14)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(16)
 
         self.drop_area = DropArea()
         self.file_list = self.drop_area.file_list
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         right_panel.setObjectName("rightPanel")
         right_layout = QVBoxLayout(right_panel)
         right_layout.setContentsMargins(0, 0, 0, 0)
-        right_layout.setSpacing(12)
+        right_layout.setSpacing(16)
 
         right_layout.addWidget(self._build_options_panel())
         right_layout.addWidget(self._build_activity_panel(), stretch=1)
@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         frame = QFrame()
         frame.setObjectName(object_name)
         layout = QVBoxLayout(frame)
-        layout.setContentsMargins(13, 13, 13, 13)
+        layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(12)
         return frame, layout
 
@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
 
         action_row = QHBoxLayout()
         action_row.setContentsMargins(0, 0, 0, 0)
-        action_row.setSpacing(10)
+        action_row.setSpacing(12)
 
         self.process_button = QPushButton("Process images")
         self.process_button.setObjectName("primaryButton")
@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
 
         output_row = QHBoxLayout()
         output_row.setContentsMargins(0, 0, 0, 0)
-        output_row.setSpacing(10)
+        output_row.setSpacing(12)
 
         self.output_label = PathLineEdit()
         self.output_button = QPushButton("Change…")

@@ -30,8 +30,8 @@ class DropArea(QFrame):
         self.setCursor(Qt.ArrowCursor)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(18, 18, 18, 18)
-        layout.setSpacing(10)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
 
         self.file_list = QListWidget()
         self.file_list.setObjectName("dropFileList")
