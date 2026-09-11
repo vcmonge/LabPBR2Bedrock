@@ -8,7 +8,7 @@ LabPBR2Bedrock is a desktop application for converting Minecraft Java PBR textur
 
 ## Screenshot
 
-![LabPBR2Bedrock](https://ik.imagekit.io/dmNtb25nZQ/LabPBR2Bedrock/LabPBR2Bedrock.webp?updatedAt=1787277920137)
+![LabPBR2Bedrock](https://ik.imagekit.io/dmNtb25nZQ/LabPBR2Bedrock/LabPBR2Bedrock_2.webp?updatedAt=1789085586859)
 
 It converts:
 
