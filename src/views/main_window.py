@@ -254,17 +254,29 @@ class MainWindow(QMainWindow):
         self.pom.setVisible(True)
         self.pom.setEnabled(capabilities.pom_available)
         self.pom.setToolTip(
-            "Copies the Alpha height channel to the Blue channel of the output normal map."
+            (
+                "Packs LabPBR height into the normal Blue channel for BetterRTX 1.5 POM. "
+                "Vanilla RTX and Vibrant Visuals read Blue as Z; leave POM off to reconstruct Z."
+            )
             if capabilities.pom_available
-            else "Available when a normal texture contains LabPBR height information."
+            else (
+                "Available when a normal texture contains LabPBR height information. "
+                "POM packing targets BetterRTX 1.5, not vanilla RTX or Vibrant Visuals."
+            )
         )
 
         self.sss.setVisible(True)
         self.sss.setEnabled(capabilities.sss_available)
         self.sss.setToolTip(
-            "Converts textures containing SSS to 32-bit RGBA MERS TGA maps."
+            (
+                "Converts textures containing SSS to 32-bit RGBA MERS TGA maps. "
+                "Metalness and SSS are mutually exclusive; the higher value wins and a tie keeps SSS."
+            )
             if capabilities.sss_available
-            else "Available when an _s texture contains SSS in non-metallic pixels."
+            else (
+                "Available when an _s texture contains subsurface scattering "
+                "after metalness exclusion."
+            )
         )
 
     def _on_options_changed(self, options: ConversionOptions) -> None:

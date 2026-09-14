@@ -126,8 +126,8 @@ Los archivos que no siguen esos patrones se muestran como ignorados. Si existen 
 
 ## Opciones PBR
 
-- **SSS:** se habilita cuando un mapa specular contiene subsurface scattering. Al activarlo, las texturas que realmente tienen SSS se guardan como MERS TGA y, si se genera JSON, usan el formato `1.21.30`, las demás conservan el formato MER PNG.
-- **POM:** se habilita cuando un normal map contiene altura en su canal alfa.
+- **SSS:** se habilita cuando un mapa specular contiene subsurface scattering tras la exclusión con metalness. Al activarlo, las texturas que realmente tienen SSS se guardan como MERS TGA y, si se genera JSON, usan el formato `1.21.30`; las demás conservan el formato MER PNG. Bedrock conserva el mayor entre metalness y SSS por píxel; un empate favorece SSS.
+- **POM:** se habilita cuando un normal map contiene altura en su canal alfa. Al activarlo, esa altura se copia al canal Blue de `*_normal.png` para BetterRTX 1.5. RTX y Vibrant Visuals oficiales tratan Blue como el componente Z del normal; deja POM desactivado para reconstruir Z.
 - **Generate JSON:** crea un `*.texture_set.json` por cada nombre base convertido. Las imagenes con SSS usa el formato `1.21.30`, el resto usa `1.16.100`.
 
 ## Carpeta de salida
