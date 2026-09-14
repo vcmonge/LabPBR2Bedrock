@@ -40,15 +40,13 @@ EMISSION_MAX_VALUE = 254
 
 
 def _create_roughness_lut() -> np.ndarray:
-    """Map all LabPBR smoothness values to perceptual Bedrock roughness.
+    """Map LabPBR perceptual smoothness to Bedrock roughness by inversion.
 
-    LabPBR stores perceptual smoothness, while Bedrock stores roughness. The
-    conversion is ``roughness = (1 - smoothness / 255) ** 2 * 255``.
-    ``np.rint`` preserves the converter's defined nearest-integer behavior.
+    LabPBR Red is smoothness (255 = mirror). Bedrock Blue is roughness
+    (255 = rough). ``pow(1 - s, 2)`` is LabPBR shader decode to linear
+    roughness, not a Bedrock texel encoding.
     """
-    smoothness = np.arange(256, dtype=np.float64)
-    roughness_linear = (1.0 - smoothness / 255.0) ** 2
-    return np.clip(np.rint(roughness_linear * 255.0), 0, 255).astype(np.uint8)
+    return (255 - np.arange(256, dtype=np.uint8)).astype(np.uint8)
 
 
 def _create_emissive_lut() -> np.ndarray:
