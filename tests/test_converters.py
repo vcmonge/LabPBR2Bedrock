@@ -180,11 +180,18 @@ class SpecularConverterTests(unittest.TestCase):
             root = Path(temp_dir)
             no_sss_path = root / "stone_s.png"
             sss_path = root / "leaves_s.png"
-            save_rgba(no_sss_path, [(0, 0, 65, 255), (0, 230, 255, 255)])
+            save_rgba(no_sss_path, [(0, 0, 65, 255), (0, 230, 254, 255)])
             save_rgba(sss_path, [(0, 0, 65, 255), (0, 229, 66, 255)])
 
             self.assertFalse(has_subsurface_scattering(no_sss_path))
             self.assertTrue(has_subsurface_scattering(sss_path))
+
+    def test_detects_sss_when_metal_loses_to_max_sss(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = Path(temp_dir) / "wax_s.png"
+            save_rgba(source, [(0, 230, 255, 255)])
+
+            self.assertTrue(has_subsurface_scattering(source))
 
     def test_converts_specular_channels_to_bedrock_ranges(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -233,11 +240,11 @@ class SpecularConverterTests(unittest.TestCase):
                     ],
                 )
 
-    def test_sss_is_zero_for_metal_pixels(self) -> None:
+    def test_sss_is_zero_when_metalness_is_higher(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = root / "mixed_s.png"
-            save_rgba(source, [(0, 230, 255, 255), (0, 229, 255, 255)])
+            save_rgba(source, [(0, 230, 160, 255), (0, 229, 255, 255)])
 
             output_path = convert_specular_to_mer(
                 source,
@@ -251,6 +258,25 @@ class SpecularConverterTests(unittest.TestCase):
                     [(255, 0, 255, 0), (0, 0, 255, 255)],
                 )
 
+    def test_max_sss_wins_tie_against_metalness(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "wax_s.png"
+            save_rgba(source, [(0, 230, 255, 255), (0, 229, 255, 255)])
+
+            output_path = convert_specular_to_mer(
+                source,
+                root / "output",
+                sss_enabled=True,
+            )
+
+            self.assertEqual(output_path.name, "wax_mers.tga")
+            with Image.open(output_path) as converted:
+                self.assertEqual(
+                    [converted.getpixel((x, 0)) for x in range(converted.width)],
+                    [(0, 0, 255, 255), (0, 0, 255, 255)],
+                )
+
     def test_disabled_or_absent_sss_keeps_rgb_png_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -259,7 +285,7 @@ class SpecularConverterTests(unittest.TestCase):
             metallic_source = root / "iron_s.png"
             save_rgba(sss_source, [(0, 0, 255, 12)])
             save_rgba(no_sss_source, [(0, 0, 64, 12)])
-            save_rgba(metallic_source, [(0, 230, 255, 12)])
+            save_rgba(metallic_source, [(0, 230, 160, 12)])
 
             outputs = (
                 convert_specular_to_mer(sss_source, root / "disabled"),

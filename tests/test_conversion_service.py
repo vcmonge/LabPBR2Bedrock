@@ -231,6 +231,20 @@ class ConversionServiceIntegrationTests(unittest.TestCase):
             "stone_mer",
         )
 
+    def test_metal_sss_tie_writes_mers_and_clears_metalness(self) -> None:
+        save_rgba(self.inputs / "wax_s.png", [(0, 230, 255, 12)])
+
+        summary = self.convert(version="1.21.30", sss_enabled=True)
+
+        self.assertEqual(summary.errors, [])
+        self.assertEqual(summary.converted[0].output_path.name, "wax_mers.tga")
+        with Image.open(self.output / "wax_mers.tga") as converted:
+            self.assertEqual(converted.getpixel((0, 0)), (0, 12, 255, 255))
+        data = json.loads(
+            (self.output / "wax.texture_set.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(data["format_version"], "1.21.30")
+
     def test_sss_uses_mers_name_in_output_and_121_json(self) -> None:
         save_rgba(self.inputs / "leaves_s.png", [(0, 0, 66, 12)])
 

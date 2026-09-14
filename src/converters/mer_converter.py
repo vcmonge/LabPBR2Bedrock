@@ -98,24 +98,39 @@ def texture_base_name(path: Path) -> str:
     return path.stem[:-2]
 
 
+def _apply_metal_sss_exclusion(
+    metalness: np.ndarray,
+    sss_alpha: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Keep the higher of metalness and SSS; a tie favors SSS.
+
+    Bedrock Vibrant Visuals resolves conflicting metal and SSS the same way.
+    Metalness is binary (0 or 255), so a tie only occurs when SSS is 255.
+    """
+    metal_wins = metalness > sss_alpha
+    metalness = metalness.copy()
+    sss_alpha = sss_alpha.copy()
+    sss_alpha[metal_wins] = 0
+    metalness[~metal_wins] = 0
+    return metalness, sss_alpha
+
+
 def _channels_have_sss(
     blue_channel: np.ndarray,
     f0_metal_channel: np.ndarray,
 ) -> bool:
-    """Return whether any non-metal pixel carries an effective SSS value."""
-    return bool(
-        np.any(
-            (blue_channel > SSS_MIN_VALUE)
-            & (f0_metal_channel < METAL_ID_MIN_VALUE)
-        )
-    )
+    """Return whether any pixel keeps SSS after metalness exclusion."""
+    metalness = METALNESS_LUT[f0_metal_channel]
+    sss_alpha = SSS_LUT[blue_channel]
+    _, sss_alpha = _apply_metal_sss_exclusion(metalness, sss_alpha)
+    return bool(np.any(sss_alpha))
 
 
 def has_subsurface_scattering(specular_path: Path) -> bool:
     """Inspect a LabPBR specular map for effective subsurface scattering.
 
-    Metal pixels cannot carry SSS, and blue values through 65 encode porosity,
-    so neither makes SSS available to the converter.
+    Porosity (blue 0..65) is not SSS. Metal pixels keep SSS only when the
+    remapped alpha ties or beats metalness (SSS 255), matching Bedrock.
     """
     with Image.open(specular_path) as specular_img:
         spec_array = np.asarray(specular_img.convert("RGB"))
@@ -134,9 +149,10 @@ def convert_specular_to_mer(
 
     The output channel mapping is:
 
-    * R: binary metalness derived from the LabPBR green-channel metal IDs.
+    * R: binary metalness derived from the LabPBR green-channel metal IDs,
+      cleared when SSS wins the per-pixel exclusion.
     * G: LabPBR alpha copied as emission, with 255 mapped to 0.
-    * B: roughness derived from LabPBR red-channel smoothness.
+    * B: inverted LabPBR red-channel smoothness (roughness = 255 - R).
     * A: normalized SSS from LabPBR blue, only when enabled and present.
 
     Effective SSS produces a 32-bit RGBA ``*_mers.tga``. Otherwise the result
@@ -157,12 +173,14 @@ def convert_specular_to_mer(
         subsurface = spec_array[:, :, 2]
         emission = spec_array[:, :, 3]
 
-        # LUT indexing returns a new array, so zeroing SSS on metal pixels does
-        # not mutate the shared lookup table.
+        metalness = METALNESS_LUT[f0_metal]
         sss_alpha = None
         if sss_enabled:
             sss_alpha = SSS_LUT[subsurface]
-            sss_alpha[f0_metal >= METAL_ID_MIN_VALUE] = 0
+            metalness, sss_alpha = _apply_metal_sss_exclusion(
+                metalness,
+                sss_alpha,
+            )
 
         # Do not emit an RGBA MERS file merely because the option is enabled;
         # the source texture must contain at least one effective SSS pixel.
@@ -174,7 +192,7 @@ def convert_specular_to_mer(
             dtype=np.uint8,
         )
 
-        mer_array[:, :, 0] = METALNESS_LUT[f0_metal]
+        mer_array[:, :, 0] = metalness
         mer_array[:, :, 1] = EMISSIVE_LUT[emission]
         mer_array[:, :, 2] = ROUGHNESS_LUT[smoothness]
 
