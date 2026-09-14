@@ -34,9 +34,9 @@ SSS_VALUE_RANGE = 255 - SSS_MIN_VALUE
 # Bedrock only needs a binary metalness channel for this conversion.
 METAL_ID_MIN_VALUE = 230
 
-# Alpha 255 means "no emission" in LabPBR. The remaining 0..254 values span
-# the emission range and therefore need normalization to Bedrock's 0..255.
-EMISSION_MAX_VALUE = 254
+# Alpha 255 means "no emission" in LabPBR. Values 0..254 are already in
+# Bedrock's emission range and must not be stretched to 255.
+EMISSION_DISABLED_VALUE = 255
 
 
 def _create_roughness_lut() -> np.ndarray:
@@ -50,15 +50,13 @@ def _create_roughness_lut() -> np.ndarray:
 
 
 def _create_emissive_lut() -> np.ndarray:
-    """Map LabPBR emission values 0..254 to Bedrock's full uint8 range.
+    """Copy LabPBR emission 0..254; map the disabled sentinel 255 to 0.
 
-    Index 255 remains zero because LabPBR reserves it as the no-emission value.
+    LabPBR reserves 255 as disabled. The remaining values are already in
+    Bedrock's 0..254 range and must not be stretched to 255.
     """
-    emissive = np.zeros(256, dtype=np.uint8)
-    emission = np.arange(EMISSION_MAX_VALUE + 1, dtype=np.float64)
-    emissive[: EMISSION_MAX_VALUE + 1] = np.rint(
-        emission * 255.0 / EMISSION_MAX_VALUE
-    ).astype(np.uint8)
+    emissive = np.arange(256, dtype=np.uint8)
+    emissive[EMISSION_DISABLED_VALUE] = 0
     return emissive
 
 
@@ -137,7 +135,7 @@ def convert_specular_to_mer(
     The output channel mapping is:
 
     * R: binary metalness derived from the LabPBR green-channel metal IDs.
-    * G: normalized emission derived from LabPBR alpha.
+    * G: LabPBR alpha copied as emission, with 255 mapped to 0.
     * B: roughness derived from LabPBR red-channel smoothness.
     * A: normalized SSS from LabPBR blue, only when enabled and present.
 

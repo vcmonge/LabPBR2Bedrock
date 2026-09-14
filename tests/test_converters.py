@@ -154,13 +154,8 @@ class SpecularConverterTests(unittest.TestCase):
         expected_roughness = (255 - values).astype(np.uint8)
         expected_metalness = np.zeros(256, dtype=np.uint8)
         expected_metalness[mer_converter.METAL_ID_MIN_VALUE :] = 255
-        expected_emissive = np.zeros(256, dtype=np.uint8)
-        emission_values = values[: mer_converter.EMISSION_MAX_VALUE + 1]
-        expected_emissive[: mer_converter.EMISSION_MAX_VALUE + 1] = np.rint(
-            emission_values.astype(np.float64)
-            * 255.0
-            / mer_converter.EMISSION_MAX_VALUE
-        ).astype(np.uint8)
+        expected_emissive = values.copy()
+        expected_emissive[mer_converter.EMISSION_DISABLED_VALUE] = 0
         expected_sss = np.zeros(256, dtype=np.uint8)
         sss_values = values[mer_converter.SSS_MIN_VALUE + 1 :]
         expected_sss[mer_converter.SSS_MIN_VALUE + 1 :] = np.rint(
@@ -205,7 +200,7 @@ class SpecularConverterTests(unittest.TestCase):
             with Image.open(output_path) as converted:
                 self.assertEqual(
                     [converted.getpixel((x, 0)) for x in range(converted.width)],
-                    [(0, 255, 63), (255, 0, 255), (0, 128, 0)],
+                    [(0, 254, 63), (255, 0, 255), (0, 127, 0)],
                 )
 
     def test_sss_writes_normalized_alpha_to_32_bit_rgba_tga(self) -> None:
