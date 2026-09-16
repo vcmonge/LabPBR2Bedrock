@@ -103,21 +103,18 @@ class MainWindowIntegrationTests(unittest.TestCase):
             self.assertEqual(window.output_button.text(), "Change…")
             self.assertTrue(window.output_label.isReadOnly())
             self.assertIsNone(window.findChild(QStatusBar))
-            self.assertFalse(window.process_button.icon().isNull())
-            self.assertFalse(window.clear_button.icon().isNull())
-            self.assertFalse(window.drop_area.browse_button.icon().isNull())
+            self.assertTrue(window.process_button.icon().isNull())
+            self.assertTrue(window.clear_button.icon().isNull())
+            self.assertTrue(window.drop_area.browse_button.icon().isNull())
             self.assertFalse(window.drop_area.drop_icon.pixmap().isNull())
             self.assertEqual(
                 window.drop_area.subtitle.text(),
                 "PNG/TGA image files with\n*_s, *_n, or *_normal suffixes",
             )
             self.assertNotIn("folders", window.drop_area.subtitle.text())
-            self.assertFalse(window.output_button.icon().isNull())
+            self.assertTrue(window.output_button.icon().isNull())
             section_icons = window.findChildren(QLabel, "sectionIcon")
-            self.assertEqual(len(section_icons), 3)
-            self.assertTrue(
-                all(not icon.pixmap().isNull() for icon in section_icons)
-            )
+            self.assertEqual(len(section_icons), 0)
             self.assertNotIn(
                 "Clear log",
                 [button.text() for button in window.findChildren(QPushButton)],

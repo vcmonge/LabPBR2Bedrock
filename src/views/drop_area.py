@@ -67,8 +67,6 @@ class DropArea(QFrame):
 
         self.browse_button = QPushButton("Browse files…")
         self.browse_button.setObjectName("browseButton")
-        self.browse_button.setIcon(QIcon(str(ASSETS_DIR / "folder_icon.svg")))
-        self.browse_button.setIconSize(QSize(21, 21))
         self.browse_button.setAccessibleName("Browse texture files")
         self.browse_button.clicked.connect(lambda _checked=False: self.clicked.emit())
 

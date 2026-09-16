@@ -97,21 +97,13 @@ class MainWindow(QMainWindow):
         return QIcon(str(ASSETS_DIR / file_name))
 
     @classmethod
-    def _section_title(cls, icon_name: str, text: str) -> QHBoxLayout:
+    def _section_title(cls, text: str) -> QHBoxLayout:
         row = QHBoxLayout()
         row.setContentsMargins(0, 0, 0, 0)
-        row.setSpacing(9)
-
-        icon = QLabel()
-        icon.setObjectName("sectionIcon")
-        icon.setPixmap(cls._icon(icon_name).pixmap(QSize(25, 25)))
-        icon.setFixedSize(27, 27)
-        icon.setAlignment(Qt.AlignCenter)
-        icon.setAttribute(Qt.WA_TransparentForMouseEvents)
+        row.setSpacing(0)
 
         title = QLabel(text)
         title.setObjectName("sectionTitle")
-        row.addWidget(icon)
         row.addWidget(title)
         row.addStretch(1)
         return row
@@ -134,14 +126,10 @@ class MainWindow(QMainWindow):
 
         self.process_button = QPushButton("Process images")
         self.process_button.setObjectName("primaryButton")
-        self.process_button.setIcon(self._icon("process_images_icon.svg"))
-        self.process_button.setIconSize(QSize(22, 22))
         self.process_button.setAccessibleName("Process images")
 
         self.clear_button = QPushButton("Clear")
         self.clear_button.setObjectName("clearButton")
-        self.clear_button.setIcon(self._icon("clear-icon.svg"))
-        self.clear_button.setIconSize(QSize(22, 22))
         self.clear_button.setAccessibleName("Clear inputs and activity log")
 
         action_row.addWidget(self.process_button, stretch=6)
@@ -154,7 +142,7 @@ class MainWindow(QMainWindow):
         divider.setFrameShadow(QFrame.Plain)
         panel_layout.addWidget(divider)
 
-        panel_layout.addLayout(self._section_title("options-icon.svg", "Options"))
+        panel_layout.addLayout(self._section_title("Options"))
 
         option_rows = QVBoxLayout()
         option_rows.setContentsMargins(4, 2, 4, 4)
@@ -183,7 +171,7 @@ class MainWindow(QMainWindow):
 
     def _build_activity_panel(self) -> QFrame:
         panel, panel_layout = self._section_frame("activityPanel")
-        panel_layout.addLayout(self._section_title("log_icon.svg", "Activity log"))
+        panel_layout.addLayout(self._section_title("Activity log"))
 
         self.console = QPlainTextEdit()
         self.console.setObjectName("consoleInfo")
@@ -197,7 +185,7 @@ class MainWindow(QMainWindow):
     def _build_output_panel(self) -> QFrame:
         panel, panel_layout = self._section_frame("outputPanel")
         panel_layout.addLayout(
-            self._section_title("folder_icon.svg", "Output directory")
+            self._section_title("Output directory")
         )
 
         output_row = QHBoxLayout()
@@ -207,8 +195,6 @@ class MainWindow(QMainWindow):
         self.output_label = PathLineEdit()
         self.output_button = QPushButton("Change…")
         self.output_button.setObjectName("secondaryButton")
-        self.output_button.setIcon(self._icon("folder_icon.svg"))
-        self.output_button.setIconSize(QSize(21, 21))
         self.output_button.setToolTip("Change output folder")
         self.output_button.setAccessibleName("Change output folder")
 
