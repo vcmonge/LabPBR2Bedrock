@@ -8,7 +8,7 @@ LabPBR2Bedrock es una aplicación de escritorio para convertir texturas PBR de M
 
 ## Captura de pantalla
 
-![LabPBR2Bedrock](https://ik.imagekit.io/dmNtb25nZQ/LabPBR2Bedrock/LabPBR2Bedrock_2.webp?updatedAt=1789085586859)
+![LabPBR2Bedrock](https://ik.imagekit.io/dmNtb25nZQ/LabPBR2Bedrock/LabPBR2Bedrockv3.webp?updatedAt=1789529312137)
 
 Convierte:
 
