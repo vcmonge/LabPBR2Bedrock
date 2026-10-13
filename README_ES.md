@@ -17,75 +17,82 @@ Convierte:
 - Mapas normales `*_n` en mapas `*_normal.png`.
 - Opcionalmente, genera archivos `*.texture_set.json` para Minecraft Bedrock.
 
-## Ejemplo
-
-Archivos de entrada:
-
-```text
-stone_s.png
-stone_n.png
-```
-
-Archivos de salida:
-
-```text
-stone_mer.png
-stone_normal.png
-stone.texture_set.json (opcional)
-```
-
-Los mapas specular y normal que comparten nombre base se procesan como una sola textura y generan un único JSON. También se admiten mapas sin pareja. Por ejemplo:
-
-Entrada:
-
-```text
-stone_s.png
-dirt_n.png
-cherry_leaves_s.png
-```
-Salida:
-
-```text
-stone_mer.png
-dirt_normal.png
-cherry_leaves.tga
-
-# (Si se activó la opción de "Generate JSON")
-stone.texture_set.json
-dirt.texture_set.json
-cherry_leaves.texture_set.json
-```
-
 ## Requisitos
 
 - Windows 10 u 11.
-- Python 3.14.
+- Python 3.14 (la instalación automática lo descarga si no está disponible).
 
 ## Instalación
 
-Abre PowerShell en la carpeta del proyecto y elige uno de estos métodos.
+### Instalación automática (recomendada)
 
-### Con Python Launcher
+Haz doble clic en `windows_setup.bat`. El script:
 
-Si instalaste Python desde python.org y tienes disponible Python Launcher (`py`), ejecuta:
+1. Instala [uv](https://docs.astral.sh/uv/) si no está disponible.
+2. Descarga Python 3.14 con `uv` si no está instalado.
+3. Crea el entorno virtual `.venv`, o lo recrea si está incompleto o usa otra versión de Python.
+4. Instala las dependencias de `requirements.txt` y verifica que se puedan importar.
+
+Al terminar, inicia la aplicación con `run.bat`. Puedes volver a ejecutar la instalación sin riesgo: solo repite los pasos que falten.
+
+### Instalación manual
+
+Si prefieres instalar todo por tu cuenta, elige uno de estos métodos. Ejecuta los comandos en PowerShell desde la carpeta del proyecto.
+
+#### Opción A: Python desde python.org
+
+1. Descarga e instala Python 3.14 desde [python.org](https://www.python.org/downloads/windows/). Asegúrate de incluir Python Launcher (`py`) en la instalación.
+2. Abre una nueva ventana de PowerShell y confirma que Python 3.14 está disponible:
+
+   ```powershell
+   py -3.14 --version
+   ```
+
+3. Crea el entorno virtual e instala las dependencias:
+
+   ```powershell
+   py -3.14 -m venv .venv
+
+   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+   ```
+
+#### Opción B: uv
+
+1. Instala [uv](https://docs.astral.sh/uv/getting-started/installation/) :
+
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+2. Abre una nueva ventana de PowerShell y confirma que uv está disponible:
+
+   ```powershell
+   uv --version
+   ```
+
+3. Descarga Python 3.14 si aún no lo tienes:
+
+   ```powershell
+   uv python install 3.14
+   ```
+
+4. Crea el entorno virtual e instala las dependencias:
+
+   ```powershell
+   uv venv --python 3.14 .venv
+
+   uv pip install -r requirements.txt
+   ```
+
+#### Verificar la instalación
+
+Ambos métodos crean el entorno virtual `.venv` e instalan PySide6, Pillow y NumPy. Para confirmar que las dependencias están disponibles, ejecuta:
 
 ```powershell
-py -3.14 -m venv .venv
-
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -c "import PySide6, PIL, numpy"
 ```
 
-### Con uv
-
-Como alternativa, si tienes [uv](https://docs.astral.sh/uv/getting-started/installation/) instalado, ejecuta:
-
-```powershell
-uv venv --python 3.14 .venv
-
-uv pip install -r requirements.txt
-```
-
-`uv` puede descargar Python 3.14 automáticamente si no lo encuentra instalado. Ambos métodos crean el entorno virtual `.venv` e instalan PySide6, Pillow y NumPy.
+Si el comando termina sin errores, inicia la aplicación con `run.bat`.
 
 ## Ejecutar la aplicación
 
@@ -93,7 +100,7 @@ uv pip install -r requirements.txt
 
 Haz doble clic en `run.bat`.
 
-El script localiza automáticamente `app.py` y el entorno `.venv` con respecto a su propia ubicación. No inicia la aplicación si el entorno virtual no existe.
+El script localiza automáticamente `app.py` y el entorno `.venv` con respecto a su propia ubicación. No inicia la aplicación si el entorno virtual no existe; en ese caso, ejecuta primero `windows_setup.bat`.
 
 ### Opción 2: PowerShell
 
@@ -133,6 +140,45 @@ Los archivos que no siguen esos patrones se muestran como ignorados. Si existen 
 ## Carpeta de salida
 
 La carpeta elegida con `Change...` se recuerda entre ejecuciones. La preferencia guardada tiene prioridad sobre `--output-dir`.
+
+## Ejemplo
+
+Archivos de entrada:
+
+```text
+stone_s.png
+stone_n.png
+```
+
+Archivos de salida:
+
+```text
+stone_mer.png
+stone_normal.png
+stone.texture_set.json (opcional)
+```
+
+Los mapas specular y normal que comparten nombre base se procesan como una sola textura y generan un único JSON. También se admiten mapas sin pareja. Por ejemplo:
+
+Entrada:
+
+```text
+stone_s.png
+dirt_n.png
+cherry_leaves_s.png
+```
+Salida:
+
+```text
+stone_mer.png
+dirt_normal.png
+cherry_leaves.tga
+
+# (Si se activó la opción de "Generate JSON")
+stone.texture_set.json
+dirt.texture_set.json
+cherry_leaves.texture_set.json
+```
 
 ## Notas
 

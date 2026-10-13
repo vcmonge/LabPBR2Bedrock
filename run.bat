@@ -13,6 +13,6 @@ exit /b 0
 
 :launch_error
 echo Unable to start the application because the virtual environment is missing.
-echo Create the .venv environment and install the requirements before trying again.
+echo Run windows_setup.bat to create the .venv environment and install the requirements.
 pause
 exit /b 1

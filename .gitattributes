@@ -1,0 +1,3 @@
+# Windows scripts must keep CRLF line endings for cmd.exe and PowerShell
+*.bat text eol=crlf
+*.ps1 text eol=crlf
