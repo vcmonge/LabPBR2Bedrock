@@ -201,7 +201,7 @@ class ConversionServiceIntegrationTests(unittest.TestCase):
             self.assertEqual(converted.mode, "RGB")
             self.assertEqual(converted.getpixel((0, 0)), (255, 12, 255))
 
-    def test_mixed_sss_batch_selects_output_format_and_json_per_texture(self) -> None:
+    def test_mixed_sss_batch_writes_mers_and_121_json_for_every_specular(self) -> None:
         save_rgba(self.inputs / "leaves_s.png", [(0, 0, 66, 12)])
         save_rgba(self.inputs / "stone_s.png", [(0, 0, 64, 12)])
 
@@ -210,26 +210,27 @@ class ConversionServiceIntegrationTests(unittest.TestCase):
         self.assertEqual(summary.errors, [])
         self.assertEqual(
             {item.output_path.name for item in summary.converted},
-            {"leaves_mers.tga", "stone_mer.png"},
+            {"leaves_mers.tga", "stone_mers.png"},
         )
-        leaves_data = json.loads(
-            (self.output / "leaves.texture_set.json").read_text(encoding="utf-8")
-        )
-        stone_data = json.loads(
-            (self.output / "stone.texture_set.json").read_text(encoding="utf-8")
-        )
-        self.assertEqual(leaves_data["format_version"], "1.21.30")
-        self.assertEqual(
-            leaves_data["minecraft:texture_set"]
-            ["metalness_emissive_roughness_subsurface"],
-            "leaves_mers",
-        )
-        self.assertEqual(stone_data["format_version"], "1.16.100")
-        self.assertEqual(
-            stone_data["minecraft:texture_set"]
-            ["metalness_emissive_roughness"],
-            "stone_mer",
-        )
+        with Image.open(self.output / "leaves_mers.tga") as converted:
+            self.assertEqual(converted.mode, "RGBA")
+        with Image.open(self.output / "stone_mers.png") as converted:
+            self.assertEqual(converted.mode, "RGB")
+        self.assertFalse((self.output / "stone_mer.png").exists())
+
+        for base_name in ("leaves", "stone"):
+            with self.subTest(base_name=base_name):
+                data = json.loads(
+                    (self.output / f"{base_name}.texture_set.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                self.assertEqual(data["format_version"], "1.21.30")
+                self.assertEqual(
+                    data["minecraft:texture_set"]
+                    ["metalness_emissive_roughness_subsurface"],
+                    f"{base_name}_mers",
+                )
 
     def test_metal_sss_tie_writes_mers_and_clears_metalness(self) -> None:
         save_rgba(self.inputs / "wax_s.png", [(0, 230, 255, 12)])
@@ -261,10 +262,50 @@ class ConversionServiceIntegrationTests(unittest.TestCase):
             "leaves_mers",
         )
 
+    def test_unpaired_normal_follows_selected_sss_json_version(self) -> None:
+        save_rgba(self.inputs / "stone_n.png")
+
+        summary = self.convert(version="1.21.30", sss_enabled=True)
+
+        self.assertEqual(summary.errors, [])
+        data = json.loads(
+            (self.output / "stone.texture_set.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(data["format_version"], "1.21.30")
+        self.assertEqual(
+            data["minecraft:texture_set"]
+            ["metalness_emissive_roughness_subsurface"],
+            "stone_mers",
+        )
+
+    def test_121_without_sss_writes_alpha_less_mers_png_and_121_json(self) -> None:
+        save_rgba(self.inputs / "leaves_s.png", [(0, 0, 66, 12)])
+        save_rgba(self.inputs / "stone_n.png")
+
+        summary = self.convert(version="1.21.30", sss_enabled=False)
+
+        self.assertEqual(summary.errors, [])
+        with Image.open(self.output / "leaves_mers.png") as converted:
+            self.assertEqual(converted.mode, "RGB")
+        self.assertFalse((self.output / "leaves_mers.tga").exists())
+        for base_name in ("leaves", "stone"):
+            with self.subTest(base_name=base_name):
+                data = json.loads(
+                    (self.output / f"{base_name}.texture_set.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                self.assertEqual(data["format_version"], "1.21.30")
+                self.assertEqual(
+                    data["minecraft:texture_set"]
+                    ["metalness_emissive_roughness_subsurface"],
+                    f"{base_name}_mers",
+                )
+
     def test_unpaired_normal_uses_116_mer_json(self) -> None:
         save_rgba(self.inputs / "stone_n.png")
 
-        summary = self.convert(version="1.21.30")
+        summary = self.convert(version="1.16.100")
 
         self.assertEqual(summary.errors, [])
         json_path = self.output / "stone.texture_set.json"

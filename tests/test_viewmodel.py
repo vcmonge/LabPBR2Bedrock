@@ -76,7 +76,7 @@ class ConverterViewModelTests(unittest.TestCase):
                 "No new supported files were added. Use PNG or TGA.",
             )
 
-    def test_sss_and_json_version_are_kept_in_sync(self) -> None:
+    def test_sss_requires_121_but_121_does_not_require_sss(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             specular = root / "leaves_s.png"
@@ -89,30 +89,62 @@ class ConverterViewModelTests(unittest.TestCase):
             self.assertEqual(vm.options.json_version, "1.21.30")
 
             vm.set_sss_enabled(False)
-            self.assertEqual(vm.options.json_version, "1.16.100")
-
-            vm.set_json_version("1.21.30")
-            self.assertTrue(vm.options.sss_enabled)
+            self.assertFalse(vm.options.sss_enabled)
             self.assertEqual(vm.options.json_version, "1.21.30")
 
+            vm.set_json_version("1.16.100")
+            self.assertEqual(vm.options.json_version, "1.16.100")
+            vm.set_json_version("1.21.30")
+            self.assertFalse(vm.options.sss_enabled)
+            self.assertEqual(vm.options.json_version, "1.21.30")
+
+            vm.set_sss_enabled(True)
             vm.set_json_version("1.16.100")
             self.assertFalse(vm.options.sss_enabled)
             self.assertEqual(vm.options.json_version, "1.16.100")
 
-    def test_clear_paths_disables_sss(self) -> None:
+    def test_121_can_be_selected_for_specular_without_sss(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            specular = root / "stone_s.png"
+            save_rgba(specular, blue=64)
+            vm = create_viewmodel(root)
+            vm.add_paths([str(specular)])
+
+            self.assertFalse(vm.capabilities.has_sss)
+            vm.set_json_version("1.21.30")
+            self.assertFalse(vm.options.sss_enabled)
+            self.assertEqual(vm.options.json_version, "1.21.30")
+
+    def test_sss_and_121_can_be_selected_without_inputs(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            vm = create_viewmodel(Path(temp_dir))
+
+            vm.set_json_version("1.21.30")
+            self.assertEqual(vm.options.json_version, "1.21.30")
+            vm.set_sss_enabled(True)
+            self.assertTrue(vm.options.sss_enabled)
+            self.assertEqual(vm.options.json_version, "1.21.30")
+
+    def test_sss_preference_survives_input_changes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             specular = root / "leaves_s.png"
+            normal = root / "leaves_n.png"
             save_rgba(specular, blue=255)
+            save_rgba(normal)
             vm = create_viewmodel(root)
             vm.add_paths([str(specular)])
             vm.set_sss_enabled(True)
 
             vm.clear_paths()
             self.assertEqual(vm.input_paths, [])
-            self.assertFalse(vm.capabilities.sss_available)
-            self.assertFalse(vm.options.sss_enabled)
-            self.assertEqual(vm.options.json_version, "1.16.100")
+            self.assertTrue(vm.options.sss_enabled)
+            self.assertEqual(vm.options.json_version, "1.21.30")
+
+            vm.add_paths([str(normal)])
+            self.assertTrue(vm.options.sss_enabled)
+            self.assertEqual(vm.options.json_version, "1.21.30")
 
     def test_process_without_inputs_requests_information(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

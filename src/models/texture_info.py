@@ -12,5 +12,4 @@ class TextureCapabilities:
     has_speculars: bool = False
     has_sss: bool = False
     pom_available: bool = False
-    sss_available: bool = False
     has_pom: bool = False

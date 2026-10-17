@@ -277,36 +277,73 @@ class SpecularConverterTests(unittest.TestCase):
                     [(0, 0, 255, 255), (0, 0, 255, 255)],
                 )
 
-    def test_disabled_or_absent_sss_keeps_rgb_png_output(self) -> None:
+    def test_disabled_sss_keeps_rgb_png_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             sss_source = root / "leaves_s.png"
+            save_rgba(sss_source, [(0, 0, 255, 12)])
+
+            output_path = convert_specular_to_mer(sss_source, root / "disabled")
+
+            self.assertEqual(output_path.name, "leaves_mer.png")
+            with Image.open(output_path) as converted:
+                self.assertEqual(converted.mode, "RGB")
+
+    def test_mers_output_without_sss_packing_writes_alpha_less_png(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "leaves_s.png"
+            save_rgba(source, [(0, 230, 255, 12)])
+
+            output_path = convert_specular_to_mer(
+                source,
+                root / "output",
+                mers_output=True,
+            )
+
+            self.assertEqual(output_path.name, "leaves_mers.png")
+            with Image.open(output_path) as converted:
+                self.assertEqual(converted.mode, "RGB")
+                # Without SSS packing metalness is not excluded.
+                self.assertEqual(converted.getpixel((0, 0)), (255, 12, 255))
+
+    def test_enabled_but_absent_sss_writes_alpha_less_mers_png(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
             no_sss_source = root / "stone_s.png"
             metallic_source = root / "iron_s.png"
-            save_rgba(sss_source, [(0, 0, 255, 12)])
             save_rgba(no_sss_source, [(0, 0, 64, 12)])
             save_rgba(metallic_source, [(0, 230, 160, 12)])
 
-            outputs = (
-                convert_specular_to_mer(sss_source, root / "disabled"),
-                convert_specular_to_mer(
-                    no_sss_source,
-                    root / "absent",
-                    sss_enabled=True,
+            cases = (
+                (
+                    convert_specular_to_mer(
+                        no_sss_source,
+                        root / "absent",
+                        sss_enabled=True,
+                    ),
+                    "stone_mers.png",
+                    (0, 12, 255),
                 ),
-                convert_specular_to_mer(
-                    metallic_source,
-                    root / "metallic",
-                    sss_enabled=True,
+                (
+                    convert_specular_to_mer(
+                        metallic_source,
+                        root / "metallic",
+                        sss_enabled=True,
+                    ),
+                    "iron_mers.png",
+                    (255, 12, 255),
                 ),
             )
 
-            for output_path in outputs:
+            for output_path, expected_name, expected_pixel in cases:
                 with self.subTest(output_path=output_path), Image.open(
                     output_path
                 ) as converted:
-                    self.assertEqual(output_path.suffix, ".png")
+                    self.assertEqual(output_path.name, expected_name)
+                    self.assertEqual(converted.format, "PNG")
                     self.assertEqual(converted.mode, "RGB")
+                    self.assertEqual(converted.getpixel((0, 0)), expected_pixel)
 
     def test_alternate_output_extension_is_left_untouched(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -328,13 +365,17 @@ class SpecularConverterTests(unittest.TestCase):
             self.assertEqual(tga_output.suffix, ".tga")
             self.assertEqual(existing_png.read_bytes(), original_png)
             original_tga = tga_output.read_bytes()
+            png_output = convert_specular_to_mer(source, output_dir)
+            self.assertEqual(png_output.suffix, ".png")
+            self.assertEqual(tga_output.read_bytes(), original_tga)
+
             save_rgba(source, [(0, 0, 64, 12)])
-            png_output = convert_specular_to_mer(
+            mers_png_output = convert_specular_to_mer(
                 source,
                 output_dir,
                 sss_enabled=True,
             )
-            self.assertEqual(png_output.suffix, ".png")
+            self.assertEqual(mers_png_output.name, "leaves_mers.png")
             self.assertEqual(tga_output.read_bytes(), original_tga)
 
 

@@ -163,6 +163,16 @@ class MainWindow(QMainWindow):
         option_rows.addLayout(json_row)
 
         self.sss = QCheckBox("SSS")
+        self.sss.setToolTip(
+            "Packs LabPBR subsurface scattering into the MERS alpha channel and "
+            "selects 1.21.30. Textures containing SSS get a 32-bit RGBA TGA. "
+            "Metalness and SSS are mutually exclusive; the higher value wins and a tie keeps SSS."
+        )
+        self.json_version.setToolTip(
+            "1.16.100 writes MER maps (_mer.png). 1.21.30 writes MERS maps (_mers): "
+            "a 32-bit RGBA TGA when SSS is packed, otherwise an RGB PNG without alpha, "
+            "which Vibrant Visuals reads as SSS 255 (no fallback)."
+        )
         self.pom = QCheckBox("POM")
         option_rows.addWidget(self.sss)
         option_rows.addWidget(self.pom)
@@ -248,20 +258,6 @@ class MainWindow(QMainWindow):
             else (
                 "Available when a normal texture contains LabPBR height information. "
                 "POM packing targets BetterRTX 1.5, not vanilla RTX or Vibrant Visuals."
-            )
-        )
-
-        self.sss.setVisible(True)
-        self.sss.setEnabled(capabilities.sss_available)
-        self.sss.setToolTip(
-            (
-                "Converts textures containing SSS to 32-bit RGBA MERS TGA maps. "
-                "Metalness and SSS are mutually exclusive; the higher value wins and a tie keeps SSS."
-            )
-            if capabilities.sss_available
-            else (
-                "Available when an _s texture contains subsurface scattering "
-                "after metalness exclusion."
             )
         )
 

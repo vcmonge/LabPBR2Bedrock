@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import tempfile
 import unittest
@@ -64,7 +65,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
 
             self.assertFalse(window.pom.isHidden())
             self.assertFalse(window.pom.isEnabled())
-            self.assertFalse(window.sss.isEnabled())
+            self.assertTrue(window.sss.isEnabled())
 
             window.add_paths([str(flat_normal_path)])
             self.assertFalse(window.pom.isHidden())
@@ -97,7 +98,8 @@ class MainWindowIntegrationTests(unittest.TestCase):
             self.assertFalse(window.generate_json.isChecked())
             self.assertTrue(window.json_version.isEnabled())
             self.assertEqual(window.json_version.currentText(), "1.16.100")
-            self.assertFalse(window.sss.isEnabled())
+            self.assertTrue(window.sss.isEnabled())
+            self.assertFalse(window.sss.isChecked())
             self.assertFalse(window.pom.isEnabled())
             self.assertEqual(window.console.toPlainText(), "")
             self.assertEqual(window.output_button.text(), "Change…")
@@ -156,7 +158,7 @@ class MainWindowIntegrationTests(unittest.TestCase):
             file_picker.assert_not_called()
             window.close()
 
-    def test_json_version_and_sss_stay_synced_when_json_is_disabled(self) -> None:
+    def test_sss_checkbox_and_version_selector_when_json_is_disabled(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             texture_path = root / "leaves_s.png"
@@ -165,14 +167,18 @@ class MainWindowIntegrationTests(unittest.TestCase):
             window.add_paths([str(texture_path)])
 
             self.assertFalse(window.generate_json.isChecked())
-            window.json_version.setCurrentText("1.21.30")
-            self.assertTrue(window.sss.isChecked())
+            window.sss.setChecked(True)
+            self.assertEqual(window.json_version.currentText(), "1.21.30")
 
+            window.sss.setChecked(False)
+            self.assertEqual(window.json_version.currentText(), "1.21.30")
+
+            window.sss.setChecked(True)
             window.json_version.setCurrentText("1.16.100")
             self.assertFalse(window.sss.isChecked())
 
-            window.sss.setChecked(True)
-            self.assertEqual(window.json_version.currentText(), "1.21.30")
+            window.json_version.setCurrentText("1.21.30")
+            self.assertFalse(window.sss.isChecked())
             window.close()
 
     def test_processing_with_sss_checked_writes_tga(self) -> None:
@@ -193,14 +199,63 @@ class MainWindowIntegrationTests(unittest.TestCase):
                 (root / "output" / "leaves.texture_set.json").exists()
             )
             self.assertEqual(window.file_list.count(), 0)
-            self.assertFalse(window.sss.isEnabled())
-            self.assertFalse(window.sss.isChecked())
-            self.assertEqual(window.json_version.currentText(), "1.16.100")
+            self.assertTrue(window.sss.isChecked())
+            self.assertEqual(window.json_version.currentText(), "1.21.30")
             self.assertIn(
                 "leaves_s.png -> leaves_mers.tga",
                 window.console.toPlainText(),
             )
             self.assertTrue(window.process_button.isEnabled())
+            window.close()
+
+    def test_sss_json_can_be_generated_for_specular_without_sss(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            specular_path = root / "stone_s.png"
+            save_rgba(specular_path, blue=64)
+            window = create_window(root)
+
+            window.add_paths([str(specular_path)])
+            window.generate_json.setChecked(True)
+            window.json_version.setCurrentText("1.21.30")
+            self.assertFalse(window.sss.isChecked())
+            summary = window.process_images()
+
+            self.assertIsNotNone(summary)
+            output_dir = root / "output"
+            with Image.open(output_dir / "stone_mers.png") as converted:
+                self.assertEqual(converted.mode, "RGB")
+            self.assertFalse((output_dir / "stone_mer.png").exists())
+            data = json.loads(
+                (output_dir / "stone.texture_set.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(data["format_version"], "1.21.30")
+            self.assertEqual(
+                data["minecraft:texture_set"]
+                ["metalness_emissive_roughness_subsurface"],
+                "stone_mers",
+            )
+            self.assertIn(
+                "stone_s.png -> stone_mers.png (JSON: stone.texture_set.json)",
+                window.console.toPlainText(),
+            )
+            window.close()
+
+    def test_sss_version_can_be_selected_before_and_kept_after_clear(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            normal_path = root / "stone_n.png"
+            save_rgba(normal_path, alpha=255)
+            window = create_window(root)
+
+            window.sss.setChecked(True)
+            self.assertEqual(window.json_version.currentText(), "1.21.30")
+
+            window.add_paths([str(normal_path)])
+            self.assertEqual(window.json_version.currentText(), "1.21.30")
+            window.clear_button.click()
+            self.assertTrue(window.sss.isChecked())
+            self.assertEqual(window.json_version.currentText(), "1.21.30")
             window.close()
 
     def test_clear_button_clears_inputs_and_console_but_keeps_json_preference(self) -> None:

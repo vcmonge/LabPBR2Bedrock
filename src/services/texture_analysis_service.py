@@ -51,14 +51,15 @@ class TextureAnalysisService:
                     has_sss = True
                     break
             except Exception:
-                # Corrupt or unsupported images do not expose the SSS option.
+                # Corrupt or unsupported images are not reported as SSS.
                 continue
 
+        # has_sss is informational only: SSS and its JSON version are a user
+        # choice that does not depend on the inputs.
         return TextureCapabilities(
             has_normals=has_normals,
             has_speculars=has_speculars,
             has_pom=has_pom,
             has_sss=has_sss,
             pom_available=has_pom,
-            sss_available=has_sss,
         )

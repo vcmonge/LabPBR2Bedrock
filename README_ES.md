@@ -13,7 +13,7 @@ LabPBR2Bedrock es una aplicación de escritorio para convertir texturas PBR de M
 Convierte:
 
 - Mapas specular `*_s.png` en mapas MER `*_mer.png`.
-- Mapas specular con subsurface scattering (SSS) en mapas MERS `*_mers.tga` cuando se activa esa opción (La opción se habilita al detectarse SSS en la textura de entrada).
+- Mapas specular en mapas MERS cuando se selecciona el formato `1.21.30`: `*_mers.tga` para texturas cuyo SSS se empaqueta (`SSS` activado y SSS real presente) y `*_mers.png` sin alfa para el resto. Ambas opciones siempre se pueden seleccionar, aunque ninguna entrada tenga SSS.
 - Mapas normales `*_n` en mapas `*_normal.png`.
 - Opcionalmente, genera archivos `*.texture_set.json` para Minecraft Bedrock.
 
@@ -112,7 +112,7 @@ El script localiza automáticamente `app.py` y el entorno `.venv` con respecto a
 
 1. Arrastra archivos o carpetas al recuadro principal, o usa `Browse files...`.
 2. Activa `Generate JSON` si necesitas archivos `*.texture_set.json`.
-3. Si la entrada contiene SSS y quieres conservarlo, activa `SSS`.
+3. Selecciona `1.21.30` para generar texture sets MERS y activa `SSS` si además quieres empaquetar el SSS real de las texturas.
 4. Si un normal map contiene información de altura y quieres conservarla, activa `POM`.
 5. Selecciona la carpeta de salida con `Change...` si es necesario.
 6. Presiona `Process images`.
@@ -133,9 +133,9 @@ Los archivos que no siguen esos patrones se muestran como ignorados. Si existen 
 
 ## Opciones PBR
 
-- **SSS:** se habilita cuando un mapa specular contiene subsurface scattering tras la exclusión con metalness. Al activarlo, las texturas que realmente tienen SSS se guardan como MERS TGA y, si se genera JSON, usan el formato `1.21.30`; las demás conservan el formato MER PNG. Bedrock conserva el mayor entre metalness y SSS por píxel; un empate favorece SSS.
+- **SSS:** empaqueta el SSS de LabPBR en el canal alfa de MERS. MER no tiene canal de SSS, así que activar `SSS` selecciona `1.21.30` y elegir `1.16.100` desactiva `SSS`; desactivar `SSS` conserva `1.21.30`. Ambas opciones siempre se pueden elegir y se conservan tras procesar y tras `Clear`. Elegir el `format_version` correcto queda a cargo del usuario. Con `1.21.30`, las texturas con SSS tras la exclusión con metalness producen un `*_mers.tga` RGBA de 32 bits si `SSS` está activado; el resto (incluidas todas si `SSS` está desactivado) producen un `*_mers.png` RGB sin canal alfa. Cuando el texture set declara MERS pero la textura no tiene canal alfa, Vibrant Visuals no aplica ningún fallback y toma SSS = 255 (máximo) en todos los píxeles. Bedrock conserva el mayor entre metalness y SSS por píxel; un empate favorece SSS.
 - **POM:** se habilita cuando un normal map contiene altura en su canal alfa. Al activarlo, esa altura se copia al canal Blue de `*_normal.png` para BetterRTX 1.5. RTX y Vibrant Visuals oficiales tratan Blue como el componente Z del normal; deja POM desactivado para reconstruir Z.
-- **Generate JSON:** crea un `*.texture_set.json` por cada nombre base convertido. Las imagenes con SSS usa el formato `1.21.30`, el resto usa `1.16.100`.
+- **Generate JSON:** crea un `*.texture_set.json` por cada nombre base convertido. Todos los texture sets usan el formato seleccionado: `1.21.30` apunta a `*_mers` y `1.16.100` a `*_mer`, incluidos los nombres base que solo tienen normal.
 
 ## Carpeta de salida
 

@@ -142,16 +142,10 @@ class ConverterViewModel(QObject):
         self._capabilities = self._analysis.analyze(self._state.input_paths)
         options_changed = False
 
+        # SSS and its JSON version are a user preference and are not reset by
+        # the analysis; only POM depends on the current inputs.
         if not self._capabilities.pom_available and self._state.pom_enabled:
             self._state.pom_enabled = False
-            options_changed = True
-        if not self._capabilities.sss_available and self._state.sss_enabled:
-            self._state.sss_enabled = False
-            options_changed = True
-
-        expected_version = self._json_version_for_sss()
-        if self._state.json_version != expected_version:
-            self._state.json_version = expected_version
             options_changed = True
 
         self.capabilities_changed.emit(self._capabilities)
@@ -163,11 +157,11 @@ class ConverterViewModel(QObject):
         self.options_changed.emit(self.options)
 
     def set_json_version(self, version: str) -> None:
-        if version == MERS_JSON_VERSION and self._capabilities.sss_available:
-            self._state.sss_enabled = True
-        elif version == MER_JSON_VERSION:
+        # The version is the user's choice; only MER (1.16.100) cannot hold
+        # SSS, so selecting it turns SSS packing off.
+        self._state.json_version = version
+        if version == MER_JSON_VERSION:
             self._state.sss_enabled = False
-        self._state.json_version = self._json_version_for_sss()
         self.options_changed.emit(self.options)
 
     def set_pom_enabled(self, enabled: bool) -> None:
@@ -175,16 +169,12 @@ class ConverterViewModel(QObject):
         self.options_changed.emit(self.options)
 
     def set_sss_enabled(self, enabled: bool) -> None:
-        self._state.sss_enabled = bool(enabled) and self._capabilities.sss_available
-        self._state.json_version = self._json_version_for_sss()
+        # Packing SSS requires MERS (1.21.30); turning SSS off keeps the
+        # selected version so 1.21.30 can be used without real SSS.
+        self._state.sss_enabled = bool(enabled)
+        if self._state.sss_enabled:
+            self._state.json_version = MERS_JSON_VERSION
         self.options_changed.emit(self.options)
-
-    def _json_version_for_sss(self) -> str:
-        return (
-            MERS_JSON_VERSION
-            if self._state.sss_enabled
-            else MER_JSON_VERSION
-        )
 
     @staticmethod
     def _format_summary(summary: ConversionSummary, output_dir: Path) -> str:

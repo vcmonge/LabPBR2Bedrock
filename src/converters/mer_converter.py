@@ -144,6 +144,7 @@ def convert_specular_to_mer(
     specular_path: Path,
     output_dir: Path,
     sss_enabled: bool = False,
+    mers_output: bool = False,
 ) -> Path:
     """Convert one LabPBR ``*_s`` texture to a Bedrock MER or MERS map.
 
@@ -155,9 +156,11 @@ def convert_specular_to_mer(
     * B: inverted LabPBR red-channel smoothness (roughness = 255 - R).
     * A: normalized SSS from LabPBR blue, only when enabled and present.
 
-    Effective SSS produces a 32-bit RGBA ``*_mers.tga``. Otherwise the result
-    is an RGB ``*_mer.png``, even when SSS was enabled for the surrounding
-    batch. The decision is deliberately made for each individual texture.
+    Effective SSS (``sss_enabled`` and at least one SSS pixel) produces a
+    32-bit RGBA ``*_mers.tga``. Otherwise a MERS target (``mers_output`` or
+    ``sss_enabled``) produces an RGB ``*_mers.png`` without alpha; Vibrant
+    Visuals has no fallback for a missing MERS alpha and reads SSS as 255.
+    Any other case produces an RGB ``*_mer.png``.
     """
     base_name = texture_base_name(specular_path)
 
@@ -182,8 +185,8 @@ def convert_specular_to_mer(
                 sss_alpha,
             )
 
-        # Do not emit an RGBA MERS file merely because the option is enabled;
-        # the source texture must contain at least one effective SSS pixel.
+        # Only write an alpha channel when at least one pixel has effective
+        # SSS; the game reads a missing MERS alpha as SSS 255.
         use_sss = sss_alpha is not None and bool(np.any(sss_alpha))
         channel_count = 4 if use_sss else 3
 
@@ -200,6 +203,9 @@ def convert_specular_to_mer(
             mer_array[:, :, 3] = sss_alpha
             mer_path = output_dir / f"{base_name}_mers.tga"
             output_format = "TGA"
+        elif mers_output or sss_enabled:
+            mer_path = output_dir / f"{base_name}_mers.png"
+            output_format = "PNG"
         else:
             mer_path = output_dir / f"{base_name}_mer.png"
             output_format = "PNG"

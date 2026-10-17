@@ -82,22 +82,32 @@ class TextureAnalysisServiceTests(unittest.TestCase):
             normal_only = service.analyze([normal])
             self.assertTrue(normal_only.has_pom)
             self.assertTrue(normal_only.pom_available)
-            self.assertFalse(normal_only.sss_available)
+            self.assertFalse(normal_only.has_sss)
 
             combined = service.analyze([flat_normal, normal, specular])
             self.assertTrue(combined.has_normals)
             self.assertTrue(combined.has_speculars)
             self.assertTrue(combined.has_pom)
             self.assertTrue(combined.pom_available)
-            self.assertTrue(combined.sss_available)
+            self.assertTrue(combined.has_sss)
 
-    def test_corrupt_specular_does_not_enable_sss(self) -> None:
+    def test_specular_without_sss_is_not_reported_as_sss(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            specular = Path(temp_dir) / "stone_s.png"
+            save_rgba(specular, blue=64)
+
+            capabilities = TextureAnalysisService().analyze([specular])
+
+            self.assertTrue(capabilities.has_speculars)
+            self.assertFalse(capabilities.has_sss)
+
+    def test_corrupt_specular_is_not_reported_as_sss(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             path = Path(temp_dir) / "broken_s.png"
             path.write_bytes(b"not an image")
             capabilities = TextureAnalysisService().analyze([path])
             self.assertTrue(capabilities.has_speculars)
-            self.assertFalse(capabilities.sss_available)
+            self.assertFalse(capabilities.has_sss)
 
     def test_corrupt_normal_does_not_enable_pom(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

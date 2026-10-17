@@ -67,7 +67,6 @@ class ConversionService:
 
             json_path = self._create_group_json(
                 group,
-                successful_conversions,
                 output_dir,
                 template_dir,
                 options,
@@ -170,6 +169,7 @@ class ConversionService:
                         texture_path,
                         output_dir,
                         sss_enabled=options.sss_enabled,
+                        mers_output=ConversionService._uses_mers(options),
                     )
                 else:
                     output_path = convert_normal_to_bedrock(
@@ -186,9 +186,17 @@ class ConversionService:
         return successful_conversions
 
     @staticmethod
+    def _uses_mers(options: ConversionOptions) -> bool:
+        """Return whether speculars and texture sets target MERS (1.21.30).
+
+        The selected version decides it; SSS packing also implies MERS
+        because MER has no channel for subsurface scattering.
+        """
+        return options.json_version == MERS_JSON_VERSION or options.sss_enabled
+
+    @staticmethod
     def _create_group_json(
         group: _TextureGroup,
-        successful_conversions: list[tuple[Path, Path, _TextureType]],
         output_dir: Path,
         template_dir: Path,
         options: ConversionOptions,
@@ -198,15 +206,14 @@ class ConversionService:
             return None
 
         try:
-            uses_mers = any(
-                texture_type == "specular"
-                and output_path.stem.endswith("_mers")
-                for _, output_path, texture_type in successful_conversions
-            )
+            # The same rule names the specular output (_mer or _mers), so the
+            # template matches it for every group, including normal-only ones.
             effective_json_version = options.json_version
             if options.json_version in SUPPORTED_JSON_VERSIONS:
                 effective_json_version = (
-                    MERS_JSON_VERSION if uses_mers else MER_JSON_VERSION
+                    MERS_JSON_VERSION
+                    if ConversionService._uses_mers(options)
+                    else MER_JSON_VERSION
                 )
             return create_texture_set_json(
                 group.base_name,
