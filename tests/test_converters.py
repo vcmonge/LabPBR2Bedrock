@@ -156,13 +156,8 @@ class SpecularConverterTests(unittest.TestCase):
         expected_metalness[mer_converter.METAL_ID_MIN_VALUE :] = 255
         expected_emissive = values.copy()
         expected_emissive[mer_converter.EMISSION_DISABLED_VALUE] = 0
-        expected_sss = np.zeros(256, dtype=np.uint8)
-        sss_values = values[mer_converter.SSS_MIN_VALUE + 1 :]
-        expected_sss[mer_converter.SSS_MIN_VALUE + 1 :] = np.rint(
-            (sss_values.astype(np.float64) - mer_converter.SSS_MIN_VALUE)
-            * 255.0
-            / mer_converter.SSS_VALUE_RANGE
-        ).astype(np.uint8)
+        expected_sss = values.copy()
+        expected_sss[: mer_converter.SSS_MIN_VALUE + 1] = 0
 
         for lut, expected in (
             (ROUGHNESS_LUT, expected_roughness),
@@ -210,7 +205,7 @@ class SpecularConverterTests(unittest.TestCase):
                     [(0, 254, 63), (255, 0, 255), (0, 127, 0)],
                 )
 
-    def test_sss_writes_normalized_alpha_to_32_bit_rgba_tga(self) -> None:
+    def test_sss_writes_direct_alpha_to_32_bit_rgba_tga(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             source = root / "leaves_s.png"
@@ -235,7 +230,7 @@ class SpecularConverterTests(unittest.TestCase):
                     [
                         (0, 12, 255, 0),
                         (0, 12, 255, 0),
-                        (0, 12, 255, 128),
+                        (0, 12, 255, 160),
                         (0, 12, 255, 255),
                     ],
                 )

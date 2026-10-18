@@ -25,10 +25,9 @@ from PIL import Image
 
 from src.models import SUPPORTED_IMAGE_EXTENSIONS
 
-# LabPBR values 0..65 in the blue channel are reserved for porosity. Values
-# above 65 represent SSS and are remapped to Bedrock's full 0..255 range.
+# LabPBR values 0..64 in the blue channel are porosity and 65 is 0% SSS.
+# Values above 65 represent SSS and are copied to Bedrock without rescaling.
 SSS_MIN_VALUE = 65
-SSS_VALUE_RANGE = 255 - SSS_MIN_VALUE
 
 # LabPBR uses green values 0..229 for dielectric F0 and 230..255 for metal IDs.
 # Bedrock only needs a binary metalness channel for this conversion.
@@ -61,16 +60,13 @@ def _create_emissive_lut() -> np.ndarray:
 
 
 def _create_sss_lut() -> np.ndarray:
-    """Map LabPBR SSS values 66..255 to Bedrock alpha values 1..255.
+    """Copy LabPBR SSS values 66..255; map 0..65 to 0.
 
-    Values through 65 remain zero because they belong to LabPBR's porosity
-    range rather than its subsurface-scattering range.
+    Values through 64 are porosity and 65 is 0% scattering. The SSS range is
+    copied directly and must not be stretched to Bedrock's 0..255 range.
     """
-    sss = np.zeros(256, dtype=np.uint8)
-    subsurface = np.arange(SSS_MIN_VALUE + 1, 256, dtype=np.float64)
-    sss[SSS_MIN_VALUE + 1 :] = np.rint(
-        (subsurface - SSS_MIN_VALUE) * 255.0 / SSS_VALUE_RANGE
-    ).astype(np.uint8)
+    sss = np.arange(256, dtype=np.uint8)
+    sss[: SSS_MIN_VALUE + 1] = 0
     return sss
 
 
@@ -130,7 +126,7 @@ def has_subsurface_scattering(specular_path: Path) -> bool:
     """Inspect a LabPBR specular map for effective subsurface scattering.
 
     Porosity (blue 0..65) is not SSS. Metal pixels keep SSS only when the
-    remapped alpha ties or beats metalness (SSS 255), matching Bedrock.
+    copied alpha ties or beats metalness (SSS 255), matching Bedrock.
     """
     with Image.open(specular_path) as specular_img:
         spec_array = np.asarray(specular_img.convert("RGB"))
@@ -154,7 +150,7 @@ def convert_specular_to_mer(
       cleared when SSS wins the per-pixel exclusion.
     * G: LabPBR alpha copied as emission, with 255 mapped to 0.
     * B: inverted LabPBR red-channel smoothness (roughness = 255 - R).
-    * A: normalized SSS from LabPBR blue, only when enabled and present.
+    * A: SSS copied from LabPBR blue 66..255, only when enabled and present.
 
     Effective SSS (``sss_enabled`` and at least one SSS pixel) produces a
     32-bit RGBA ``*_mers.tga``. Otherwise a MERS target (``mers_output`` or
